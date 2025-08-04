@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sınav Notları</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .file-input-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .viewer-container {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #5a6fd8;
+            transform: translateY(-1px);
+        }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .counter {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .zoom-btn {
+            background: #764ba2;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .zoom-btn:hover {
+            background: #6a4190;
+        }
+
+        .image-container {
+            text-align: center;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: auto;
+            max-height: 70vh;
+        }
+
+        .note-image {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .keyboard-shortcuts {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .shortcuts {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            .nav-buttons {
+                order: 2;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .counter {
+                order: 1;
+            }
+            
+            .zoom-controls {
+                order: 3;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Sınav Notları</h1>
+        
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <button class="file-input-button" id="loadFromGitHub">📁 GitHub'dan Yükle</button>
+                <button class="file-input-button" style="margin-left: 10px;" id="loadFromDevice">📷 Cihazdan Seç</button>
+                <input type="file" id="fileInput" class="file-input" multiple accept="image/*" style="display: none;">
+            </div>
+            <div style="color: #666; margin-top: 10px;">
+                GitHub'a yüklediğin fotoğraflar otomatik gelecek
+            </div>
+        </div>
+
+        <div class="viewer-container" id="viewerContainer">
+            <div class="controls">
+                <div class="nav-buttons">
+                    <button class="nav-btn" id="prevBtn">⬅️ Önceki</button>
+                    <button class="nav-btn" id="nextBtn">Sonraki ➡️</button>
+                </div>
+                
+                <div class="counter" id="counter">1 / 1</div>
+                
+                <div class="zoom-controls">
+                    <button class="zoom-btn" id="zoomOutBtn">🔍-</button>
+                    <button class="zoom-btn" id="resetZoomBtn">100%</button>
+                    <button class="zoom-btn" id="zoomInBtn">🔍+</button>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="image-container" id="imageContainer">
+                <img class="note-image" id="noteImage" alt="Ders Notu">
+            </div>
+
+            <div class="keyboard-shortcuts">
+                <div class="shortcuts">
+                    ⌨️ <strong>Kısayollar:</strong> ← → ok tuşları | Space/Enter: sonraki | +/- zoom
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let images = [];
+        let currentIndex = 0;
+        let zoomLevel = 1;
+
+        const fileInput = document.getElementById('fileInput');
+        const viewerContainer = document.getElementById('viewerContainer');
+        const noteImage = document.getElementById('noteImage');
+        const counter = document.getElementById('counter');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressFill = document.getElementById('progressFill');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const resetZoomBtn = document.getElementById('resetZoomBtn');
+        const loadFromGitHub = document.getElementById('loadFromGitHub');
+        const loadFromDevice = document.getElementById('loadFromDevice');
+
+        // GitHub'dan fotoğraf listesi - buraya fotoğraf isimlerini ekle
+        const githubImages = [
+            'not1.jpg',
+            'not2.jpg', 
+            'not3.jpg',
+            'not4.jpg',
+            'not5.jpg'
+            // Daha fazla fotoğraf ekleyebilirsin
+        ];
+
+        loadFromGitHub.addEventListener('click', loadFromGitHubImages);
+        loadFromDevice.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileSelect);
+        prevBtn.addEventListener('click', showPrevious);
+        nextBtn.addEventListener('click', showNext);
+        zoomInBtn.addEventListener('click', () => zoom(1.2));
+        zoomOutBtn.addEventListener('click', () => zoom(0.8));
+        resetZoomBtn.addEventListener('click', resetZoom);
+
+        // Klavye kısayolları
+        document.addEventListener('keydown', (e) => {
+            if (images.length === 0) return;
+            
+            switch(e.key) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    showPrevious();
+                    break;
+                case 'ArrowRight':
+                case ' ':
+                case 'Enter':
+                    e.preventDefault();
+                    showNext();
+                    break;
+                case '+':
+                case '=':
+                    e.preventDefault();
+                    zoom(1.2);
+                    break;
+                case '-':
+                    e.preventDefault();
+                    zoom(0.8);
+                    break;
+                case '0':
+                    e.preventDefault();
+                    resetZoom();
+                    break;
+            }
+        });
+
+        function loadFromGitHubImages() {
+            images = [];
+            let loadedCount = 0;
+            const totalImages = githubImages.length;
+
+            if (totalImages === 0) {
+                alert('Henüz GitHub\'a fotoğraf yüklenmemiş. images klasörüne fotoğrafları yükle.');
+                return;
+            }
+
+            loadFromGitHub.textContent = '⏳ Yükleniyor...';
+            loadFromGitHub.disabled = true;
+
+            githubImages.forEach((imageName, index) => {
+                const img = new Image();
+                img.onload = () => {
+                    images.push({
+                        src: `./images/${imageName}`,
+                        name: imageName
+                    });
+                    loadedCount++;
+                    
+                    if (loadedCount === totalImages) {
+                        images.sort((a, b) => a.name.localeCompare(b.name));
+                        currentIndex = 0;
+                        showImage();
+                        viewerContainer.style.display = 'block';
+                        loadFromGitHub.textContent = '✅ Yüklendi!';
+                        setTimeout(() => {
+                            loadFromGitHub.textContent = '📁 GitHub\'dan Yükle';
+                            loadFromGitHub.disabled = false;
+                        }, 2000);
+                    }
+                };
+                img.onerror = () => {
+                    console.log(`${imageName} yüklenemedi`);
+                    loadedCount++;
+                    if (loadedCount === totalImages) {
+                        if (images.length > 0) {
+                            images.sort((a, b) => a.name.localeCompare(b.name));
+                            currentIndex = 0;
+                            showImage();
+                            viewerContainer.style.display = 'block';
+                        }
+                        loadFromGitHub.textContent = '📁 GitHub\'dan Yükle';
+                        loadFromGitHub.disabled = false;
+                    }
+                };
+                img.src = `./images/${imageName}`;
+            });
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            images = [];
+            let loadedCount = 0;
+
+            files.forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        images.push({
+                            src: e.target.result,
+                            name: file.name
+                        });
+                        loadedCount++;
+                        
+                        if (loadedCount === files.length) {
+                            // Dosya isimlerine göre sırala
+                            images.sort((a, b) => a.name.localeCompare(b.name));
+                            currentIndex = 0;
+                            showImage();
+                            viewerContainer.style.display = 'block';
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        function showImage() {
+            if (images.length === 0) return;
+
+            const currentImage = images[currentIndex];
+            noteImage.src = currentImage.src;
+            counter.textContent = `${currentIndex + 1} / ${images.length}`;
+            
+            // Progress bar güncelle
+            const progress = ((currentIndex + 1) / images.length) * 100;
+            progressFill.style.width = `${progress}%`;
+
+            // Buton durumları
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === images.length - 1;
+
+            // Zoom sıfırla
+            resetZoom();
+        }
+
+        function showPrevious() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                showImage();
+            }
+        }
+
+        function showNext() {
+            if (currentIndex < images.length - 1) {
+                currentIndex++;
+                showImage();
+            }
+        }
+
+        function zoom(factor) {
+            zoomLevel *= factor;
+            zoomLevel = Math.min(Math.max(zoomLevel, 0.5), 3); // 0.5x ile 3x arası
+            noteImage.style.transform = `scale(${zoomLevel})`;
+            resetZoomBtn.textContent = `${Math.round(zoomLevel * 100)}%`;
+        }
+
+        function resetZoom() {
+            zoomLevel = 1;
+            noteImage.style.transform = 'scale(1)';
+            resetZoomBtn.textContent = '100%';
+        }
+
+        // Görsel yükleme animasyonu
+        noteImage.addEventListener('load', () => {
+            noteImage.style.opacity = '0';
+            setTimeout(() => {
+                noteImage.style.opacity = '1';
+            }, 50);
+        });
+    </script>
+</body>
+</html>
