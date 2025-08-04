@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sınav Notları</title>
+    <title>Tuana Sınav Notları</title>
     <style>
         * {
             margin: 0;
@@ -199,14 +199,13 @@
         .motivation-message {
             position: fixed;
             top: 50%;
-            right: 30px;
             background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
             color: white;
             padding: 15px 20px;
             border-radius: 25px;
             box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
-            transform: translateY(-50%) translateX(100%);
-            transition: transform 0.5s ease;
+            transform: translateY(-50%);
+            transition: all 0.5s ease;
             z-index: 1000;
             max-width: 250px;
             font-weight: 600;
@@ -214,7 +213,22 @@
             animation: heartBeat 0.5s ease;
         }
 
-        .motivation-message.show {
+        .motivation-message.right {
+            right: 30px;
+            transform: translateY(-50%) translateX(100%);
+        }
+
+        .motivation-message.right.show {
+            transform: translateY(-50%) translateX(0);
+        }
+
+        .motivation-message.left {
+            left: 30px;
+            transform: translateY(-50%) translateX(-100%);
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .motivation-message.left.show {
             transform: translateY(-50%) translateX(0);
         }
 
@@ -245,10 +259,17 @@
 
         @media (max-width: 768px) {
             .motivation-message {
-                right: 15px;
                 max-width: 200px;
                 font-size: 14px;
                 padding: 12px 16px;
+            }
+            
+            .motivation-message.right {
+                right: 15px;
+            }
+            
+            .motivation-message.left {
+                left: 15px;
             }
         }
 
@@ -293,7 +314,7 @@
                 <input type="file" id="fileInput" class="file-input" multiple accept="image/*" style="display: none;">
             </div>
             <div style="color: #666; margin-top: 10px;">
-                GitHub'a yüklediğin fotoğraflar otomatik gelecek<br>
+                GitHub'a yüklediğin fotoğraflar otomatik gelecek.<br>
                 Sana güveniyorum, bol şans ve iyi çalışmalar! 💕
             </div>
         </div>
@@ -344,7 +365,23 @@
             "Harikasın! ✨",
             "Sen yapabilirsin! 🚀",
             "Gurur duyuyorum! 💖",
-            "Başarıya çok yakınsın! 🏆"
+            "Başarıya çok yakınsın! 🏆",
+            "ABLA GÖZ GELECEK!!! 👁️🔥",
+            "Sen en iyisisin! 👑",
+            "Emeğinin karşılığını alacaksın! 💎",
+            "Çalışkanlığın takdire şayan! 📚",
+            "Hedefine odaklan, sen bu işi halledersin! 🎯",
+            "Her sayfa seni zirveye taşıyor! ⛰️",
+            "Azmin çok güzel! 💪✨",
+            "Doktor Tuana geliyor! 🩺💕",
+            "Bu ne kararlılık böyle! 🔥",
+            "Seni çok seviyorum! ❤️❤️",
+            "İnanılmaz bir performans! 🌟⭐",
+            "Çok disiplinlisin, bravo! 👏",
+            "Geleceğin çok parlak! ☀️✨",
+            "Sen bir şampiyonsun! 🏆🥇",
+            "Motivasyonun beni bile etkiliyor! 💫",
+            "Bu hırsla her şeyi başarırsın! 🚀🔥"
         ];
 
         const fileInput = document.getElementById('fileInput');
@@ -482,28 +519,36 @@
         function showMotivationMessage() {
             const message = motivationMessages[Math.floor(Math.random() * motivationMessages.length)];
             const messageEl = document.createElement('div');
-            messageEl.className = 'motivation-message';
+            
+            // Rastgele sağ veya sol taraf seç
+            const isRight = Math.random() < 0.5;
+            messageEl.className = `motivation-message ${isRight ? 'right' : 'left'}`;
             messageEl.textContent = message;
             document.body.appendChild(messageEl);
 
             // Mesajı göster
             setTimeout(() => messageEl.classList.add('show'), 100);
 
-            // 3 saniye sonra gizle
+            // 4 saniye sonra gizle (biraz daha uzun)
             setTimeout(() => {
                 messageEl.classList.remove('show');
                 setTimeout(() => messageEl.remove(), 500);
-            }, 3000);
+            }, 4000);
         }
 
         // Kalp animasyonu
         function createFloatingHeart() {
             const heart = document.createElement('div');
             heart.className = 'floating-heart';
-            heart.textContent = ['💖', '💕', '💗', '❤️'][Math.floor(Math.random() * 4)];
+            heart.textContent = ['💖', '💕', '💗', '❤️', '💝', '💘'][Math.floor(Math.random() * 6)];
             
-            // Rastgele pozisyon
-            heart.style.left = Math.random() * window.innerWidth + 'px';
+            // Rastgele pozisyon (sol ve sağ taraflardan)
+            const fromLeft = Math.random() < 0.5;
+            if (fromLeft) {
+                heart.style.left = Math.random() * (window.innerWidth * 0.3) + 'px';
+            } else {
+                heart.style.left = (window.innerWidth * 0.7 + Math.random() * (window.innerWidth * 0.3)) + 'px';
+            }
             heart.style.top = window.innerHeight + 'px';
             
             document.body.appendChild(heart);
@@ -514,25 +559,25 @@
 
         // Motivasyon sistemi başlat
         function startMotivationSystem() {
-            // İlk mesaj 10-20 saniye sonra
+            // İlk mesaj 5-10 saniye sonra (daha erken)
             setTimeout(() => {
                 showMotivationMessage();
                 
-                // Sonraki mesajlar 30-60 saniye aralıklarla
+                // Sonraki mesajlar 20-40 saniye aralıklarla (daha sık)
                 setInterval(() => {
-                    if (Math.random() < 0.7) { // %70 ihtimalle mesaj
+                    if (Math.random() < 0.8) { // %80 ihtimalle mesaj (daha sık)
                         showMotivationMessage();
                     }
-                }, Math.random() * 30000 + 30000); // 30-60 saniye
+                }, Math.random() * 20000 + 20000); // 20-40 saniye
                 
-            }, Math.random() * 10000 + 10000); // 10-20 saniye
+            }, Math.random() * 5000 + 5000); // 5-10 saniye
 
-            // Kalpler 20-40 saniye aralıklarla
+            // Kalpler 15-30 saniye aralıklarla (daha sık)
             setInterval(() => {
-                if (Math.random() < 0.6) { // %60 ihtimalle kalp
+                if (Math.random() < 0.7) { // %70 ihtimalle kalp (daha sık)
                     createFloatingHeart();
                 }
-            }, Math.random() * 20000 + 20000); // 20-40 saniye
+            }, Math.random() * 15000 + 15000); // 15-30 saniye
         }
 
         // Sayfa yüklendiğinde motivasyon sistemini başlat
