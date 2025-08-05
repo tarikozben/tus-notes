@@ -140,6 +140,35 @@
             align-items: center;
         }
 
+        .quick-nav {
+            display: flex;
+            align-items: center;
+        }
+
+        .image-selector {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .image-selector:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .image-selector option {
+            background: white;
+            color: #333;
+            padding: 8px;
+        }
+
         .zoom-btn {
             background: #764ba2;
             color: white;
@@ -239,21 +268,34 @@
             
             .controls {
                 justify-content: center;
+                flex-wrap: wrap;
+                gap: 15px;
             }
             
             .nav-buttons {
                 order: 2;
-                width: 100%;
-                justify-content: center;
+                display: flex;
+                gap: 10px;
             }
             
             .counter {
                 order: 1;
+                width: 100%;
+                text-align: center;
+            }
+            
+            .quick-nav {
+                order: 3;
             }
             
             .zoom-controls {
-                order: 3;
-                justify-content: center;
+                order: 4;
+            }
+            
+            .image-selector {
+                min-width: 100px;
+                font-size: 12px;
+                padding: 8px 12px;
             }
         }
     </style>
@@ -282,6 +324,12 @@
                 </div>
                 
                 <div class="counter" id="counter">1 / 1</div>
+                
+                <div class="quick-nav">
+                    <select id="imageSelector" class="image-selector">
+                        <option value="">📋 Hızlı Git</option>
+                    </select>
+                </div>
                 
                 <div class="zoom-controls">
                     <button class="zoom-btn" id="zoomOutBtn">🔍-</button>
@@ -427,6 +475,7 @@
         const resetZoomBtn = document.getElementById('resetZoomBtn');
         const loadFromGitHub = document.getElementById('loadFromGitHub');
         const loadFromDevice = document.getElementById('loadFromDevice');
+        const imageSelector = document.getElementById('imageSelector');
 
         loadFromGitHub.addEventListener('click', loadFromGitHubImages);
         loadFromDevice.addEventListener('click', () => fileInput.click());
@@ -436,6 +485,7 @@
         zoomInBtn.addEventListener('click', () => zoom(1.2));
         zoomOutBtn.addEventListener('click', () => zoom(0.8));
         resetZoomBtn.addEventListener('click', resetZoom);
+        imageSelector.addEventListener('change', jumpToImage);
 
         // Klavye kısayolları
         document.addEventListener('keydown', (e) => {
@@ -493,6 +543,7 @@
                     if (loadedCount === totalImages) {
                         images.sort((a, b) => a.name.localeCompare(b.name));
                         currentIndex = 0;
+                        populateImageSelector();
                         showImage();
                         viewerContainer.style.display = 'block';
                         loadFromGitHub.textContent = '✅ Yüklendi!';
@@ -509,6 +560,7 @@
                         if (images.length > 0) {
                             images.sort((a, b) => a.name.localeCompare(b.name));
                             currentIndex = 0;
+                            populateImageSelector();
                             showImage();
                             viewerContainer.style.display = 'block';
                         }
@@ -539,6 +591,28 @@
             
             // 3 saniye sonra temizle
             setTimeout(() => heart.remove(), 3000);
+        }
+
+        // Dropdown menüsünü doldur
+        function populateImageSelector() {
+            imageSelector.innerHTML = '<option value="">📋 Hızlı Git</option>';
+            images.forEach((image, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${index + 1}. ${image.name}`;
+                imageSelector.appendChild(option);
+            });
+        }
+
+        // Seçilen fotoğrafa git
+        function jumpToImage() {
+            const selectedIndex = parseInt(imageSelector.value);
+            if (!isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < images.length) {
+                currentIndex = selectedIndex;
+                showImage();
+                // Seçimi sıfırla
+                imageSelector.value = '';
+            }
         }
 
         // Motivasyon sistemi başlat (sadece kalpler)
@@ -575,6 +649,7 @@
                             // Dosya isimlerine göre sırala
                             images.sort((a, b) => a.name.localeCompare(b.name));
                             currentIndex = 0;
+                            populateImageSelector();
                             showImage();
                             viewerContainer.style.display = 'block';
                         }
@@ -599,6 +674,9 @@
             prevBtn.disabled = currentIndex === 0;
             nextBtn.disabled = currentIndex === images.length - 1;
 
+            // Dropdown güncelle
+            updateImageSelectorHighlight();
+
             // Zoom sıfırla
             resetZoom();
             
@@ -613,6 +691,14 @@
                     block: 'start' 
                 });
             }, 100);
+        }
+
+        // Dropdown'da mevcut fotoğrafı vurgula
+        function updateImageSelectorHighlight() {
+            // Placeholder'ı güncelle
+            if (imageSelector.options[0]) {
+                imageSelector.options[0].textContent = `📋 Hızlı Git (Şu an: ${currentIndex + 1})`;
+            }
         }
 
         function showPrevious() {
