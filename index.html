@@ -572,6 +572,28 @@
             });
         }
 
+        // Dropdown menüsünü doldur
+        function populateImageSelector() {
+            imageSelector.innerHTML = '<option value="">📋 Hızlı Git</option>';
+            images.forEach((image, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${index + 1}. Not`;
+                imageSelector.appendChild(option);
+            });
+        }
+
+        // Seçilen fotoğrafa git
+        function jumpToImage() {
+            const selectedIndex = parseInt(imageSelector.value);
+            if (!isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < images.length) {
+                currentIndex = selectedIndex;
+                showImage();
+                // Seçimi sıfırla
+                imageSelector.value = '';
+            }
+        }
+
         // Kalp animasyonu
         function createFloatingHeart() {
             const heart = document.createElement('div');
@@ -591,28 +613,6 @@
             
             // 3 saniye sonra temizle
             setTimeout(() => heart.remove(), 3000);
-        }
-
-        // Dropdown menüsünü doldur
-        function populateImageSelector() {
-            imageSelector.innerHTML = '<option value="">📋 Hızlı Git</option>';
-            images.forEach((image, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = `${index + 1}. ${image.name}`;
-                imageSelector.appendChild(option);
-            });
-        }
-
-        // Seçilen fotoğrafa git
-        function jumpToImage() {
-            const selectedIndex = parseInt(imageSelector.value);
-            if (!isNaN(selectedIndex) && selectedIndex >= 0 && selectedIndex < images.length) {
-                currentIndex = selectedIndex;
-                showImage();
-                // Seçimi sıfırla
-                imageSelector.value = '';
-            }
         }
 
         // Motivasyon sistemi başlat (sadece kalpler)
